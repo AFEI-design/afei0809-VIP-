@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCUM 0089PVP服务器 - VIP特权系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --vip-gold: #FFD700;
+            --vip-silver: #C0C0C0;
+            --vip-bronze: #CD7F32;
+            --vip-purple: #9B59B6;
+            --vip-red: #E74C3C;
+            --vip-blue: #3498DB;
+            --vip-green: #2ECC71;
+            --vip-orange: #E67E22;
+            --vip-black: #2C3E50;
+            --vip-dark: #1A1A1A;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2a2a2a 100%);
+            color: #f0f0f0;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 头部样式 */
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.1) 0%, rgba(155, 89, 182, 0.1) 100%);
+            border-radius: 15px;
+            margin-bottom: 40px;
+            border: 2px solid var(--vip-gold);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: 'VIP';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12rem;
+            font-weight: 900;
+            color: rgba(255, 215, 0, 0.05);
+            z-index: 0;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            color: var(--vip-gold);
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        
+        .header h2 {
+            font-size: 1.8rem;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+        
+        .header p {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            color: #ccc;
+        }
+        
+        .distribution-info {
+            background-color: rgba(46, 204, 113, 0.2);
+            border: 1px solid var(--vip-green);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #a3ffc5;
+        }
+        
+        .distribution-info h4 {
+            color: var(--vip-green);
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .distribution-info ul {
+            text-align: left;
+            max-width: 600px;
+            margin: 0 auto;
+            padding-left: 20px;
+        }
+        
+        .warning-note {
+            background-color: rgba(231, 76, 60, 0.2);
+            border: 1px solid var(--vip-red);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #ff9999;
+        }
+        
+        /* 控制栏 */
+        .control-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid #444;
+        }
+        
+        .back-btn {
+            background-color: var(--vip-blue);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background-color: #2980B9;
+            transform: translateY(-3px);
+        }
+        
+        .contact-info {
+            text-align: center;
+        }
+        
+        .contact-info h3 {
+            color: var(--vip-green);
+            margin-bottom: 5px;
+        }
+        
+        /* VIP表格容器 */
+        .vip-container {
+            overflow-x: auto;
+            margin-bottom: 40px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+        
+        /* VIP表格样式 */
+        .vip-table {
+            width: 100%;
+            min-width: 1200px;
+            border-collapse: collapse;
+        }
+        
+        .vip-table th {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 20px 15px;
+            text-align: center;
+            font-size: 1.1rem;
+            border-bottom: 2px solid var(--vip-gold);
+        }
+        
+        .vip-table td {
+            padding: 18px 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            vertical-align: middle;
+        }
+        
+        .vip-table tr:hover {
+            background-color: rgba(255, 215, 0, 0.05);
+        }
+        
+        /* VIP等级样式 */
+        .vip-level {
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .vip1 { background-color: rgba(192, 192, 192, 0.2); color: var(--vip-silver); border: 1px solid var(--vip-silver); }
+        .vip2 { background-color: rgba(205, 127, 50, 0.2); color: var(--vip-bronze); border: 1px solid var(--vip-bronze); }
+        .vip3 { background-color: rgba(155, 89, 182, 0.2); color: var(--vip-purple); border: 1px solid var(--vip-purple); }
+        .vip4 { background-color: rgba(231, 76, 60, 0.2); color: var(--vip-red); border: 1px solid var(--vip-red); }
+        .vip5 { background-color: rgba(52, 152, 219, 0.2); color: var(--vip-blue); border: 1px solid var(--vip-blue); }
+        .vip6 { background-color: rgba(46, 204, 113, 0.2); color: var(--vip-green); border: 1px solid var(--vip-green); }
+        .vip7 { background-color: rgba(230, 126, 34, 0.2); color: var(--vip-orange); border: 1px solid var(--vip-orange); }
+        .vip8 { background-color: rgba(44, 62, 80, 0.2); color: var(--vip-black); border: 1px solid var(--vip-black); }
+        .vip9 { background-color: rgba(255, 215, 0, 0.2); color: var(--vip-gold); border: 1px solid var(--vip-gold); }
+        .svip { 
+            background: linear-gradient(45deg, rgba(255, 215, 0, 0.2), rgba(155, 89, 182, 0.2));
+            color: var(--vip-gold); 
+            border: 2px solid var(--vip-gold);
+            font-size: 1.3rem;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+        
+        /* 价格样式 */
+        .price {
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: var(--vip-green);
+        }
+        
+        .price-unit {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        
+        /* 物品奖励样式 */
+        .reward-item {
+            margin: 5px 0;
+            padding: 5px 10px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            text-align: left;
+        }
+        
+        .weapon { color: #FF6B6B; }
+        .armor { color: #4ECDC4; }
+        .currency { color: #FFD93D; }
+        .tool { color: #6BCF7F; }
+        .medical { color: #FF9A76; }
+        .special { color: #9B59B6; }
+        
+        /* 每日奖励标签 */
+        .daily-tag {
+            display: inline-block;
+            background-color: rgba(46, 204, 113, 0.2);
+            color: var(--vip-green);
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+        
+        /* 重要说明区域 */
+        .important-notes {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 40px;
+            border-left: 5px solid var(--vip-red);
+        }
+        
+        .important-notes h3 {
+            color: var(--vip-red);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .important-notes ul {
+            list-style-type: none;
+            padding-left: 10px;
+        }
+        
+        .important-notes li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+        
+        .important-notes li::before {
+            content: '⚠';
+            position: absolute;
+            left: 0;
+            color: var(--vip-orange);
+            font-weight: bold;
+        }
+        
+        /* 领取指南区域 */
+        .claim-guide {
+            background-color: rgba(52, 152, 219, 0.1);
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 30px;
+            border-left: 5px solid var(--vip-blue);
+        }
+        
+        .claim-guide h3 {
+            color: var(--vip-blue);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .claim-steps {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .step {
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .step-number {
+            background-color: var(--vip-blue);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin: 0 auto 15px;
+        }
+        
+        /* 联系信息样式 */
+        .contact-section {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .contact-card {
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 25px;
+            flex: 1;
+            min-width: 300px;
+            text-align: center;
+            border: 1px solid var(--vip-green);
+        }
+        
+        .contact-card h3 {
+            color: var(--vip-green);
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
+        .contact-card p {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .contact-method {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            font-size: 1.2rem;
+        }
+        
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 50px;
+            border-top: 1px solid #444;
+            color: #888;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .header h2 {
+                font-size: 1.4rem;
+            }
+            
+            .control-bar {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .contact-card {
+                min-width: 100%;
+            }
+            
+            .vip-table th, .vip-table td {
+                padding: 12px 8px;
+                font-size: 0.9rem;
+            }
+            
+            .step {
+                min-width: 100%;
+            }
+        }
+        
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--vip-gold);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #daa520;
+        }
+        
+        /* 高亮行样式 */
+        .highlight-row {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { background-color: rgba(255, 215, 0, 0.05); }
+            50% { background-color: rgba(255, 215, 0, 0.15); }
+            100% { background-color: rgba(255, 215, 0, 0.05); }
+        }
+        
+        /* 货币符号 */
+        .currency-symbol {
+            color: var(--vip-gold);
+            font-weight: bold;
+        }
+        
+        /* 物品图标 */
+        .item-icon {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <div class="header-content">
+                <h1>SCUM 0089PVP服务器 VIP特权系统</h1>
+                <h2>专属VIP福利，提升游戏体验</h2>
+                <p>本服务器VIP系统为月费制，不同等级享受不同特权。VIP赞助主要用于服务器维护和升级，为大家提供更稳定、流畅的游戏环境。</p>
+                
+                <div class="distribution-info">
+                    <h4><i class="fas fa-gift"></i> VIP物品发放规则</h4>
+                    <ul>
+                        <li><strong>发放频率：</strong> 每日发放一次</li>
+                        <li><strong>发放时间：</strong> 开通VIP服务当天起，每日可领取</li>
+                        <li><strong>发放方式：</strong> 游戏内自行领取 (<span style="color: var(--vip-green);">@VIP礼包</span> 指令)</li>
+                        <li><strong>领取说明：</strong> 每日登录游戏后输入 @VIP礼包 领取当日奖励</li>
+                    </ul>
+                </div>
+                
+                <div class="warning-note">
+                    <strong>重要声明：</strong> 本服赞助均为维护服务器成本，请大家理性消费，快乐游戏。一经充值概不退款，所有解释权均归服务器所有。
+                </div>
+            </div>
+        </div>
+        
+        <!-- 控制栏 -->
+        <div class="control-bar">
+            <a href="index.html" class="back-btn">
+                <i class="fas fa-arrow-left"></i> 返回服务器主页
+            </a>
+            
+            <div class="contact-info">
+                <h3>赞助联系：阿飞</h3>
+                <p>PVP0089 | PVE0809 | 专属VIP可定制</p>
+            </div>
+        </div>
+        
+        <!-- VIP表格 -->
+        <div class="vip-container">
+            <table class="vip-table">
+                <thead>
+                    <tr>
+                        <th>VIP等级</th>
+                        <th>价格(月)</th>
+                        <th>美金奖励 <span class="daily-tag">每日</span></th>
+                        <th>武器奖励 <span class="daily-tag">每日</span></th>
+                        <th>装备奖励 <span class="daily-tag">每日</span></th>
+                        <th>工具/消耗品 <span class="daily-tag">每日</span></th>
+                        <th>特殊物品 <span class="daily-tag">每日</span></th>
+                    </tr>
+                </thead>
+                <tbody id="vipTableBody">
+                    <!-- VIP数据将通过JavaScript动态生成 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- 领取指南 -->
+        <div class="claim-guide">
+            <h3><i class="fas fa-box-open"></i> VIP礼包领取指南</h3>
+            <p>开通VIP后，您可以在游戏中每日领取您的VIP礼包。以下是领取步骤：</p>
+            
+            <div class="claim-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h4>登录游戏</h4>
+                    <p>正常登录SCUM游戏，进入服务器</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h4>打开聊天框</h4>
+                    <p>按<strong>T键</strong>或<strong>回车键</strong>打开聊天窗口</p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h4>输入指令</h4>
+                    <p>输入指令：<code style="color: var(--vip-green);">@VIP礼包</code></p>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h4>领取奖励</h4>
+                    <p>系统会自动发放当日VIP礼包到您的背包</p>
+                </div>
+            </div>
+            
+            <p style="margin-top: 20px; color: #aaa; font-size: 0.9rem;">
+                <i class="fas fa-info-circle"></i> 注意：每日只能领取一次VIP礼包，领取时间为当日任何时间，奖励会在服务器时间每日0点重置。
+            </p>
+        </div>
+        
+        <!-- 重要说明 -->
+        <div class="important-notes">
+            <h3><i class="fas fa-exclamation-triangle"></i> VIP购买与使用须知</h3>
+            <ul>
+                <li>所有VIP均为月费制，到期后需要续费才能继续享受VIP特权</li>
+                <li>VIP物品<strong>每日发放一次</strong>，从开通当天起每日可领取</li>
+                <li>每日登录游戏后输入 <code>@VIP礼包</code> 指令领取当日奖励</li>
+                <li>SVIP玩家可定制VIP物品，请在购买时与管理员阿飞沟通需求</li>
+                <li>VIP奖励物品如有变更，以最新公告为准</li>
+                <li>严禁将VIP物品进行现实货币交易，违者永久封禁</li>
+                <li>VIP特权仅限购买账号使用，不得转让或共享</li>
+                <li>如遇服务器重置，VIP玩家可获得特殊补偿</li>
+                <li>每日礼包领取截止时间为服务器时间当日23:59:59</li>
+                <li>如有任何问题，请及时联系管理员阿飞</li>
+                <li><strong>所有解释权均归服务器所有</strong></li>
+            </ul>
+        </div>
+        
+        <!-- 联系信息 -->
+        <div class="contact-section">
+            <div class="contact-card">
+                <h3><i class="fas fa-user-tie"></i> 赞助联系人</h3>
+                <p><strong>管理员：</strong> 阿飞</p>
+                <p><strong>负责服务器：</strong> PVP0089 | PVE0809</p>
+                <p><strong>服务特色：</strong> 专属VIP可定制</p>
+                
+                <div class="contact-method">
+                    <i class="fab fa-qq" style="color: #12B7F5;"></i>
+                    <span>QQ咨询</span>
+                </div>
+            </div>
+            
+            <div class="contact-card">
+                <h3><i class="fas fa-gift"></i> VIP特权说明</h3>
+                <p><strong>发放频率：</strong> 每日一次</p>
+                <p><strong>领取指令：</strong> @VIP礼包</p>
+                <p><strong>定制服务：</strong> SVIP玩家可指定奖励物品</p>
+                
+                <div class="contact-method">
+                    <i class="fas fa-headset" style="color: #9B59B6;"></i>
+                    <span>7x24小时客服</span>
+                </div>
+            </div>
+            
+            <div class="contact-card">
+                <h3><i class="fas fa-shield-alt"></i> 购买保障</h3>
+                <p><strong>支付方式：</strong> 支付宝/微信/QQ红包</p>
+                <p><strong>开通时间：</strong> 付款后10分钟内开通</p>
+                <p><strong>问题处理：</strong> 如未收到物品请及时联系</p>
+                
+                <div class="contact-method">
+                    <i class="fas fa-lock" style="color: #2ECC71;"></i>
+                    <span>安全交易保障</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 页脚 -->
+        <footer>
+            <p>© 2023 SCUM 0089PVP服务器 VIP系统 | 本页面内容仅供参考，实际奖励以游戏内为准</p>
+            <p>最后更新: 2023年11月12日 | 版本: 1.0.0 | 所有解释权均归服务器所有</p>
+        </footer>
+    </div>
+
+    <script>
+        // VIP数据（已删除金锁相关项目）
+        const vipData = [
+            {
+                level: "VIP1",
+                price: 38,
+                currency: "人民币",
+                money: "美金*2W",
+                weapons: ["满配AK+1"],
+                equipment: ["三级套*1"],
+                tools: ["唐刀*1", "大背包+1"],
+                special: ["赞助找阿飞", "绷带★1"]
+            },
+            {
+                level: "VIP2",
+                price: 88,
+                currency: "人民币",
+                money: "美金*5W",
+                weapons: ["满配AK+2", "满配SVD+1"],
+                equipment: ["三级套*2"],
+                tools: ["唐刀*2", "磨刀石*2"],
+                special: ["绷带*2"]
+            },
+            {
+                level: "VIP3",
+                price: 108,
+                currency: "人民币",
+                money: "美金*10W",
+                weapons: ["满配AK+3", "满配SVD+1"],
+                equipment: ["三级套*3"],
+                tools: ["唐刀*3", "磨刀石*3", "缝纫工具*1"],
+                special: ["绷带*5", "凤凰针★1"]
+            },
+            {
+                level: "VIP4",
+                price: 188,
+                currency: "人民币",
+                money: "美金*15W",
+                weapons: ["满配AK*5", "满配M249*2", "满配SVD+2"],
+                equipment: ["三级套*5"],
+                tools: ["磨刀石*5", "缝纫工具*2", "唐刀*5"],
+                special: ["绷带*7", "凤凰针*2", "汽车修理工具*1"]
+            },
+            {
+                level: "VIP5",
+                price: 268,
+                currency: "人民币",
+                money: "美金*20W",
+                weapons: ["满配AK★7", "满配M249+4", "满配SVD+4", "满配巴雷特★1"],
+                equipment: ["三级套*7"],
+                tools: ["缝纫工具*3", "磨刀石*7", "大背包*7", "汽车修理工具*2"],
+                special: ["绷带*9", "凤凰针*4", "绿卡*1", "橡胶手套*2"]
+            },
+            {
+                level: "VIP6",
+                price: 388,
+                currency: "人民币",
+                money: "美金*30W",
+                weapons: ["满配AK+9", "满配M249+6", "满配SVD+6", "满配巴雷特*2"],
+                equipment: ["三级套*9", "榴弹枪+10发榴弹"],
+                tools: ["缝纫エ具*5", "磨刀石*9", "唐刀*7", "武器修理工具*3"],
+                special: ["磨刀石*10", "凤凰针*6", "绿卡*x2", "橡胶手套*4"]
+            },
+            {
+                level: "VIP7",
+                price: 488,
+                currency: "人民币",
+                money: "美金*50W",
+                weapons: ["满配AK+12", "满配M249*8", "满配SVD*6", "满配巴雷特*3"],
+                equipment: ["三级套*12", "榴弹枪+15发榴弹"],
+                tools: ["大背包*9", "缝纫工具*7", "唐刀+9", "武器修理工具*5", "汽车修理工具*4"],
+                special: ["绷带*10", "可定制VIP物品", "凤凰针*8", "绿卡*4", "橡胶手套*8"]
+            },
+            {
+                level: "VIP8",
+                price: 688,
+                currency: "人民币",
+                money: "美金*100W",
+                weapons: ["满配AK+15", "满配M249*10", "满配SVD*6", "满配巴雷特*5"],
+                equipment: ["三级套*15", "榴弹枪+20发榴弹"],
+                tools: ["缝纫工具+9", "大背包*10", "唐刀*12", "武器修理工具x7", "汽车修理工具*6"],
+                special: ["绷带*10", "凤凰针*10", "绿卡*6", "橡胶手套*10"]
+            },
+            {
+                level: "VIP9",
+                price: 888,
+                currency: "人民币",
+                money: "美金*160W",
+                weapons: ["满配AK+20", "满配M249+15", "满配SVD+6", "满配巴雷特*8"],
+                equipment: ["三级套*15"],
+                tools: ["缝纫工具*10", "磨刀石*10", "唐刀*15", "武器修理工具*9", "汽车修理工具*8"],
+                special: ["绷带*10", "凤凰针*10", "绿卡*8", "橡胶手套*10"]
+            },
+            {
+                level: "SVIP",
+                price: "定制",
+                currency: "人民币",
+                money: "美金*定制",
+                weapons: ["满配AK+定制", "满配M249+定制", "满配SVD+定制", "满配巴雷特+定制"],
+                equipment: ["三级套*定制"],
+                tools: ["所有工具定制数量", "特殊物品定制"],
+                special: ["完全可定制", "专属标识", "优先客服", "活动特权"]
+            }
+        ];
+
+        // 物品图标映射
+        const itemIcons = {
+            "AK": "fas fa-gun",
+            "SVD": "fas fa-crosshairs",
+            "M249": "fas fa-fire",
+            "巴雷特": "fas fa-bullseye",
+            "三级套": "fas fa-shield-alt",
+            "榴弹枪": "fas fa-bomb",
+            "唐刀": "fas fa-sword",
+            "大背包": "fas fa-backpack",
+            "磨刀石": "fas fa-tools",
+            "缝纫工具": "fas fa-cut",
+            "武器修理工具": "fas fa-wrench",
+            "汽车修理工具": "fas fa-car",
+            "绷带": "fas fa-first-aid",
+            "凤凰针": "fas fa-syringe",
+            "绿卡": "fas fa-id-card",
+            "橡胶手套": "fas fa-hand-paper",
+            "美金": "fas fa-money-bill-wave"
+        };
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 渲染VIP表格
+            renderVipTable();
+            
+            // 添加SVIP行高亮
+            setTimeout(() => {
+                const svipRow = document.querySelector('tr[data-level="SVIP"]');
+                if (svipRow) {
+                    svipRow.classList.add('highlight-row');
+                }
+            }, 1000);
+            
+            // 添加返回按钮事件
+            document.querySelector('.back-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                // 如果有主页则返回，否则显示提示
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    alert('返回服务器主页功能\n在实际部署中，请将href属性设置为您的服务器主页URL');
+                }
+            });
+        });
+
+        // 渲染VIP表格
+        function renderVipTable() {
+            const tableBody = document.getElementById('vipTableBody');
+            tableBody.innerHTML = '';
+            
+            vipData.forEach(vip => {
+                const row = document.createElement('tr');
+                row.setAttribute('data-level', vip.level);
+                
+                // 等级
+                const levelCell = document.createElement('td');
+                levelCell.innerHTML = `<div class="vip-level ${vip.level.toLowerCase()}">${vip.level}</div>`;
+                
+                // 价格
+                const priceCell = document.createElement('td');
+                priceCell.innerHTML = `<span class="price">${vip.price}</span> <span class="price-unit">${vip.currency}</span>`;
+                
+                // 美金奖励
+                const moneyCell = document.createElement('td');
+                moneyCell.innerHTML = formatRewardItem(vip.money, 'currency');
+                
+                // 武器奖励
+                const weaponsCell = document.createElement('td');
+                weaponsCell.innerHTML = vip.weapons.map(weapon => formatRewardItem(weapon, 'weapon')).join('');
+                
+                // 装备奖励
+                const equipmentCell = document.createElement('td');
+                equipmentCell.innerHTML = vip.equipment.map(equip => formatRewardItem(equip, 'armor')).join('');
+                
+                // 工具/消耗品
+                const toolsCell = document.createElement('td');
+                toolsCell.innerHTML = vip.tools.map(tool => formatRewardItem(tool, 'tool')).join('');
+                
+                // 特殊物品
+                const specialCell = document.createElement('td');
+                specialCell.innerHTML = vip.special.map(special => formatRewardItem(special, 'special')).join('');
+                
+                // 添加单元格到行
+                row.appendChild(levelCell);
+                row.appendChild(priceCell);
+                row.appendChild(moneyCell);
+                row.appendChild(weaponsCell);
+                row.appendChild(equipmentCell);
+                row.appendChild(toolsCell);
+                row.appendChild(specialCell);
+                
+                // 添加行到表格
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 格式化奖励物品
+        function formatRewardItem(item, type) {
+            // 获取物品图标
+            let icon = 'fas fa-cube';
+            for (const key in itemIcons) {
+                if (item.includes(key)) {
+                    icon = itemIcons[key];
+                    break;
+                }
+            }
+            
+            // 确定CSS类
+            let cssClass = '';
+            switch(type) {
+                case 'weapon': cssClass = 'weapon'; break;
+                case 'armor': cssClass = 'armor'; break;
+                case 'currency': cssClass = 'currency'; break;
+                case 'tool': cssClass = 'tool'; break;
+                case 'medical': cssClass = 'medical'; break;
+                case 'special': cssClass = 'special'; break;
+            }
+            
+            return `
+                <div class="reward-item ${cssClass}">
+                    <i class="${icon} item-icon"></i>
+                    ${item}
+                </div>
+            `;
+        }
+
+        // 简单模拟支付按钮功能
+        function simulatePurchase(vipLevel) {
+            const vip = vipData.find(v => v.level === vipLevel);
+            if (!vip) return;
+            
+            const message = vipLevel === 'SVIP' 
+                ? `您选择了${vipLevel}，请联系管理员阿飞进行定制购买。\n\n联系方式：\nQQ咨询或游戏内联系\n\nVIP开通后，每日可在游戏中输入 @VIP礼包 领取当日奖励。`
+                : `您选择了${vipLevel}，价格：${vip.price}${vip.currency}/月\n\n请保存此信息并联系管理员阿飞完成购买。\n\n联系方式：\nQQ咨询或游戏内联系\n\nVIP开通后，每日可在游戏中输入 @VIP礼包 领取当日奖励。`;
+            
+            alert(message);
+        }
+
+        // 为表格行添加点击事件（模拟购买）
+        document.addEventListener('click', function(e) {
+            const row = e.target.closest('tr');
+            if (row && row.hasAttribute('data-level')) {
+                const vipLevel = row.getAttribute('data-level');
+                simulatePurchase(vipLevel);
+            }
+        });
+    </script>
+</body>
+</html>
